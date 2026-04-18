@@ -1,0 +1,27 @@
+{
+  "name": "halalterminal-claude-skills",
+  "version": "1.0.0",
+  "description": "Claude Code plugin for Shariah-compliant investing workflows, powered by Halal Terminal.",
+  "type": "module",
+  "license": "Apache-2.0",
+  "homepage": "https://halalterminal.com",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/goww7/halalterminal-claude-skills.git"
+  },
+  "bugs": {
+    "email": "yassir@halalterminal.com"
+  },
+  "engines": {
+    "node": ">=18"
+  },
+  "scripts": {
+    "mcp": "node scripts/halalterminal-mcp.mjs",
+    "evals": "node scripts/run-evals.mjs",
+    "evals:trigger": "node scripts/run-evals.mjs --suite=trigger",
+    "evals:shape": "node scripts/run-evals.mjs --suite=shape"
+  },
+  "dependencies": {
+    "@modelcontextprotocol/sdk": "^1.0.0"
+  }
+}

@@ -1,0 +1,18 @@
+{
+  "$schema": "https://anthropic.com/claude-code/marketplace.schema.json",
+  "name": "halalterminal-claude-skills",
+  "description": "Shariah-compliant investing skills for Claude Code, powered by Halal Terminal.",
+  "owner": {
+    "name": "Halal Terminal",
+    "email": "yassir@halalterminal.com"
+  },
+  "plugins": [
+    {
+      "name": "halalterminal-claude-skills",
+      "description": "Shariah-compliant investing skills: screen stocks across 5 methodologies (AAOIFI, DJIM, FTSE, MSCI, S&P), audit portfolios, build halal baskets with DCA, calculate zakat, surface compliance-impacting news, and more.",
+      "source": ".",
+      "category": "finance",
+      "homepage": "https://halalterminal.com"
+    }
+  ]
+}
