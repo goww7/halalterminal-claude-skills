@@ -1,6 +1,6 @@
 {
   "name": "halalterminal-claude-skills",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "Claude Code plugin for Shariah-compliant investing workflows, powered by Halal Terminal.",
   "type": "module",
   "license": "Apache-2.0",

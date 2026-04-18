@@ -1,71 +1,100 @@
 ---
 name: halal-setup
-description: One-time setup — capture the Halal Terminal API key and register the MCP server.
+description: One-time setup — walk the user through getting a free Halal Terminal API key, validate it, and persist it so the plugin's MCP bridge can start. Run this when the user has no key yet, or when diagnostics flag the key as missing or invalid.
 ---
 
 # /halal-setup
 
-You are running the Halal Terminal setup flow. Your job is to walk the user through getting an API key and wiring it into Claude Code's MCP configuration. Keep your tone warm and efficient.
+Your job is to get the user from "no API key" to "skills working" in under a minute. Be warm and fast. No lecturing about methodologies; no filler.
 
-## Step 1 — Guide the user to an API key
+## Step 1 — Guide the user to a key
 
-Print exactly:
+Print EXACTLY this block, then ask for the key:
 
-> **Halal Terminal setup**
+> **Halal Terminal — one-time setup (~30 seconds)**
 >
-> 1. Go to https://api.halalterminal.com and enter your email in the **Get your free API key in seconds** panel.
-> 2. Check your inbox — you'll receive a key starting with `ht_`.
-> 3. Paste the key when prompted below.
+> 1. Open https://api.halalterminal.com — enter your email in the **Get your free API key in seconds** panel. (Free plan, no credit card.)
+> 2. Check your inbox. You'll receive a key that starts with `ht_`.
+> 3. Paste it below.
 
-Then ask: *"Paste your Halal Terminal API key:"*
+Ask: *"Paste your Halal Terminal API key:"*
 
-## Step 2 — Validate key format
+## Step 2 — Validate the format
 
-When the user pastes a value, verify:
+When the user replies, verify:
 - Starts with `ht_`
-- Length ≥ 20 characters
+- Length ≥ 20
 - No whitespace
 
-If invalid, reject with: *"That doesn't look like a Halal Terminal key. Keys start with `ht_` and are longer than 20 characters. Please paste again."* and re-prompt.
+If invalid: *"That doesn't look like a Halal Terminal key — they start with `ht_` and are longer than 20 characters. Please paste again."* Re-prompt.
 
 ## Step 3 — Validate against the live API
 
-Call `GET https://api.halalterminal.com/api/education/methodologies` with header `X-API-Key: <key>`. Use the WebFetch tool for this validation call.
+Use the Bash tool (WebFetch cannot send custom headers). Run:
 
-Treat:
-- 2xx → key valid, continue.
-- 401/403 → *"That key was rejected by halalterminal.com. Double-check it's the one emailed to you, and try again."* Re-prompt.
-- 429 → *"That key is over its quota. Top up at https://halalterminal.com/dashboard, or create a new key."* Re-prompt.
-- 5xx / network error → *"Halal Terminal API is unreachable right now — check https://halalterminal.com for status. Skipping validation; setup will continue."* Continue.
+```bash
+curl -sS -o /dev/null -w '%{http_code}' \
+  -H 'X-API-Key: <THE_KEY>' \
+  https://api.halalterminal.com/api/education/methodologies
+```
 
-## Step 4 — Write the key into settings.json
+Interpret the HTTP status:
+- `200` → valid. Continue.
+- `401` / `403` → *"The Halal Terminal API rejected that key. Make sure you pasted the full value from your email, with no extra whitespace. Try again."* Re-prompt.
+- `429` → *"That key is already over its quota. Top up at https://halalterminal.com/dashboard, or create a new key at https://api.halalterminal.com."* Re-prompt.
+- Anything else → *"Halal Terminal API is unreachable right now, but I'll save the key anyway. Run `/halal-doctor` later to retry."* Continue.
 
-Edit `~/.claude/settings.json` to add an env var for the halalterminal MCP server:
+## Step 4 — Persist the key (TWO locations)
+
+Both locations are required:
+
+### 4a. Write `~/.claude/halalterminal/credentials` — authoritative for the MCP bridge
+
+```bash
+mkdir -p ~/.claude/halalterminal
+chmod 700 ~/.claude/halalterminal
+```
+
+Write the file with ONLY this single line (no extra blank lines, no other content):
+
+```
+HALALTERMINAL_API_KEY=<THE_KEY>
+```
+
+Then: `chmod 600 ~/.claude/halalterminal/credentials`.
+
+### 4b. Merge into `~/.claude/settings.json` under `pluginConfigs`
+
+Read the existing `~/.claude/settings.json` (create `{}` if missing). Merge in the structure:
 
 ```json
 {
-  "mcpServers": {
-    "halalterminal": {
-      "env": {
-        "HALALTERMINAL_API_KEY": "ht_THE_VALIDATED_KEY"
+  "pluginConfigs": {
+    "halalterminal-claude-skills@halalterminal-claude-skills": {
+      "mcpServers": {
+        "halalterminal": {
+          "HALALTERMINAL_API_KEY": "<THE_KEY>"
+        }
       }
     }
   }
 }
 ```
 
-Preserve all other existing content in the file. If an `mcpServers.halalterminal.env` block already exists, overwrite only `HALALTERMINAL_API_KEY`.
+Preserve every other field already in the file. If the path exists, overwrite only `HALALTERMINAL_API_KEY`.
 
-## Step 5 — Run /halal-doctor to confirm
+## Step 5 — Confirm + next steps
 
-Invoke `/halal-doctor` to verify connectivity and surface plan/quota info. If doctor reports all green, end with:
+Tell the user:
 
-> You're set. Try `Is AAPL halal?` to test.
+> Saved (key `ht_...<last 4 chars>`). **Restart Claude Code** (or reload the plugin) so the MCP bridge picks up the new key — then try `Is AAPL halal?` to verify.
 
-If doctor reports any failure, print its output and suggest `/halal-setup` again.
+If you have access to an `mcp__halalterminal__*` tool in the current session, try `mcp__halalterminal__get_quote` with `symbol: "AAPL"`. If it works (2xx), tell the user *"It's already live — no restart needed. Try `Is AAPL halal?`."*
 
-## Notes
+## Hard rules
 
-- Never echo the full API key back to the user after they paste it. When you need to reference it, show only the last 4 characters (e.g. `ht_...XYZ9`).
-- Do not write the key to any file outside `~/.claude/settings.json`.
-- Free plan = 50 tokens/month. A full screening costs 5–10 tokens — warn the user of this before ending.
+- **Never** echo the full API key back to the user. Show only the last 4 characters (`ht_...XYZ9`) in any confirmation output.
+- **Never** write the key to any location other than `~/.claude/halalterminal/credentials` and `~/.claude/settings.json`.
+- `chmod 700` the directory and `chmod 600` the credentials file — the key is a secret.
+- If validation fails and the user aborts, do not leave a partially-written credentials file — delete it.
+- Do not lecture about methodologies, pricing, or disclaimers here. Save that for skills that run after setup.

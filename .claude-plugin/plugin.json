@@ -1,6 +1,6 @@
 {
   "name": "halalterminal-claude-skills",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "Shariah-compliant investing skills for Claude Code — stock screening, portfolio audit, halal portfolio construction with DCA, ETF analysis, zakat and purification, methodology education, news watch, watchlists. Powered by Halal Terminal.",
   "author": {
     "name": "Yassir",

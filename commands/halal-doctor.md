@@ -1,67 +1,90 @@
 ---
 name: halal-doctor
-description: Diagnose Halal Terminal setup — MCP connectivity, API key validity, plan tier, token usage.
+description: Diagnose the Halal Terminal plugin — credentials storage, API key validity, plan quota, MCP bridge connectivity, skill inventory, recent errors. Read-only; never mutates state.
 ---
 
 # /halal-doctor
 
-Diagnose the user's Halal Terminal installation. Report each check as ✓ pass / ✗ fail / ⚠ warn with one-line context.
+Run the checks below in order. Report each as ✓ / ⚠ / ✗ with a one-line explanation. Keep output compact; do not lecture.
 
-## Checks (run in order)
+## 1. Plugin version
 
-### 1. Plugin version
+Read `.claude-plugin/plugin.json` from this plugin's install path. Report `name` and `version`.
 
-Read `.claude-plugin/plugin.json` from this plugin's install path; report the version.
+## 2. Credentials storage
 
-### 2. MCP server declared
+Check both locations:
 
-Run `claude mcp list` and confirm `halalterminal` is present. If not, fail: *"MCP not registered. Run /halal-setup."*
+- **Credentials file**: `~/.claude/halalterminal/credentials` — look for a line `HALALTERMINAL_API_KEY=ht_...` (length ≥ 20).
+- **pluginConfigs**: `~/.claude/settings.json` → `pluginConfigs["halalterminal-claude-skills@halalterminal-claude-skills"].mcpServers.halalterminal.HALALTERMINAL_API_KEY`.
 
-### 3. API key present
+Report:
+- ✓ "Both locations have matching key (last 4: `XYZ9`)."
+- ⚠ "Only one of the two storage locations has the key; run `/halal-setup` to sync."
+- ⚠ "The two locations have DIFFERENT keys. Run `/halal-setup` to reconcile."
+- ✗ "No API key configured. Run `/halal-setup`." — **stop here; skip remaining checks**.
 
-Read `~/.claude/settings.json` for `mcpServers.halalterminal.env.HALALTERMINAL_API_KEY`. If missing: fail with *"No API key — run /halal-setup."*
+## 3. API key valid against the live API
 
-### 4. API key valid
+Using the key from step 2, run:
 
-Call `GET https://api.halalterminal.com/api/education/methodologies` with header `X-API-Key: <key>` (WebFetch).
-- 2xx → pass.
-- 401/403 → fail: *"API key rejected."*
-- 429 → warn: *"Key is over quota — see halalterminal.com/dashboard."*
-- else → warn: *"API unreachable right now."*
-
-### 5. Plan tier + token-cost hints
-
-Call `GET https://api.halalterminal.com/api/keys/token-costs` (WebFetch). Render:
-
-```
-Plan: <tier>   (Free=50 / Starter=2500 / Pro=15000 / Enterprise=∞ tokens/month)
-Approx token costs:
-  get_quote, education reads     ~1–2 tokens
-  screen_stock, screen_etf       ~5–10 tokens
-  portfolio scan, bulk screens   up to ~50 tokens
+```bash
+curl -sS -o /dev/null -w '%{http_code}' \
+  -H 'X-API-Key: <THE_KEY>' \
+  https://api.halalterminal.com/api/education/methodologies
 ```
 
-If the endpoint is unreachable, hard-code the above fallback table.
+- `200` → ✓ "Key accepted."
+- `401` / `403` → ✗ "Key rejected. Run `/halal-setup` to replace it."
+- `429` → ⚠ "Key is over quota. See https://halalterminal.com/dashboard."
+- Other / network error → ⚠ "API unreachable right now — check status."
 
-### 6. Skill inventory
+## 4. MCP bridge status
 
-List every directory under `skills/` — expected 9 entries (one umbrella + eight workflows).
+Run `claude mcp list`. Report one of:
 
-### 7. Last MCP error
+- ✓ "Plugin MCP `halalterminal-claude-skills:halalterminal` is connected."
+- ⚠ "Plugin MCP failed to connect, but a separate `halalterminal` MCP is registered elsewhere and is serving queries. To use the plugin's bridge exclusively, remove the other registration; otherwise this is harmless."
+- ✗ "No `halalterminal` MCP is registered anywhere. Restart Claude Code after setup, or add one manually."
 
-If the MCP bridge has logged anything to `~/.claude/logs/` recently (look for `halalterminal` in filenames), show the tail.
+List every line matching `halalterminal` so the user can see the full picture.
 
-## Output format
+## 5. Plan + token costs
 
-End with either:
+Try `curl https://api.halalterminal.com/api/keys/token-costs` with the key. If 200, render the returned cost table. Otherwise fall back to this hardcoded table:
 
-> All green — you're set.
+```
+~0–1 tokens   education, news, suggest, watchlists, database reads
+~2 tokens     quote (GET), asset, dividends, filings, ohlc, trending
+~5 tokens     screen_stock, zakat, batch quotes, compare
+~10 tokens    etf screen, etf purification, reports
+~15 tokens    portfolio scan, etf compare
+~25 tokens    etf bulk screen
+~50 tokens    bulk-index screen
+```
 
-or:
+Then remind: Free plan = 50 tokens/month. Upgrade at https://halalterminal.com.
 
-> Issues above. Most common fix: rerun /halal-setup.
+## 6. Skill inventory
 
-## Notes
+List directories under the plugin's `skills/`. Expect these 9:
 
-- Never print the API key in full. If you must show it, last 4 chars only.
-- This command should never mutate state.
+`using-halal-investing, halal-verdict, halal-portfolio-audit, halal-portfolio-builder, halal-etf-analysis, halal-zakat, halal-methodologies, halal-news-watch, halal-watchlist`
+
+## 7. Recent MCP errors
+
+```bash
+ls -t ~/.claude/logs/*halalterminal*.log 2>/dev/null | head -1
+```
+
+If found, show `tail -5` of the latest. Otherwise report ✓ "No recent MCP errors."
+
+## Final line
+
+If every check passed: *"All green — you're set."*
+Otherwise: *"Issues above. Most common fix: run `/halal-setup`."*
+
+## Hard rules
+
+- **Never** print the full API key — last 4 characters only.
+- **Read-only**: never write to any file, never register or remove MCP servers.
