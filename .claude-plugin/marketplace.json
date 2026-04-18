@@ -10,8 +10,11 @@
     {
       "name": "halalterminal-claude-skills",
       "description": "Shariah-compliant investing skills: screen stocks across 5 methodologies (AAOIFI, DJIM, FTSE, MSCI, S&P), audit portfolios, build halal baskets with DCA, calculate zakat, surface compliance-impacting news, and more.",
-      "source": ".",
       "category": "finance",
+      "source": {
+        "source": "url",
+        "url": "https://github.com/goww7/halalterminal-claude-skills.git"
+      },
       "homepage": "https://halalterminal.com"
     }
   ]
