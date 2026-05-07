@@ -76,6 +76,18 @@ npm run evals   # eval harness scaffolded; per-skill evals deferred to v1.1
 
 See [CONTRIBUTING.md](CONTRIBUTING.md).
 
+## Related projects
+
+Other open-source tools in the Halal Terminal ecosystem — same API, different surfaces:
+
+| Project | What it is | License |
+|---|---|---|
+| [**halalterminal-mcp**](https://github.com/goww7/halalterminal-mcp) | The MCP server this plugin wraps — usable from any MCP-compatible client (Cursor, Cline, Codex, etc.). | Apache-2.0 |
+| [**yassir-oss**](https://github.com/goww7/yassir-oss) | Open-source ReAct agent for financial research and Shariah-compliant investing — CLI + web UI, supports OpenAI / Anthropic / local LLMs. | Apache-2.0 |
+| [**halal-discord-bot**](https://github.com/goww7/halal-discord-bot) | Discord bot — `/halal AAPL`, `/portfolio`, `/trending` slash commands. | MIT |
+| [**halal-portfolio-tracker**](https://github.com/goww7/halal-portfolio-tracker) | Next.js 14 app — enter holdings, get per-stock compliance + portfolio halal % + purification owed. One-click Vercel deploy. | MIT |
+| [**halal-pine**](https://github.com/goww7/halal-pine) | TradingView Pine Script v5 indicator that overlays compliance status on charts. Refreshed daily from the API. | MIT |
+
 ## License
 
 Apache-2.0 — see [LICENSE](LICENSE).
