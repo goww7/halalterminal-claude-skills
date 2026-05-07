@@ -50,3 +50,9 @@ description: Construct a Shariah-compliant portfolio from user constraints (capi
 - Every name in the final basket must be compliant under ALL 5 methodologies (strict default). Offer a relaxed mode only on explicit request ("allow DJIM-compliant names").
 - Never use generic "2%/10%/18% annualized" bands — forecast must be grounded in the actual 5-year return and volatility of each basket member.
 - Subagent does the heavy work; this skill is the user-facing wrapper.
+
+## Leveraging insights endpoints
+
+When a candidate ticker fails screening, prefer `/api/insights/{symbol}/alternatives?limit=2` over generic search — it returns compliance-verified, market-cap-matched substitutes drawn from the live screening cache, with `purification_rate` and `compliance_explanation` already attached. Saves a round-trip and lets the basket builder substitute without re-screening.
+
+For long-horizon portfolios (12+ months), call `/api/insights/{symbol}/trajectory` on each finalist and surface the `direction_summary`. A name with "debt/assets rising +5 pp/quarter" is a different bet than one with "debt/assets stable" even when both pass today's screen — that nuance belongs in an advisor-tier output.

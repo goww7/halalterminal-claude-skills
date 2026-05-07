@@ -15,14 +15,11 @@ description: Surface news and SEC filings that could change a holding's Shariah-
 
 1. Load `references/disclaimer.md`.
 2. For each symbol the user asks about (or each holding in their portfolio if they say "my holdings"):
-   - Call `get_news` with `symbol: <SYM>`, `limit: 5`. ~1 token per call.
-   - Call `get_sec_filings` with `symbol: <SYM>`, `limit: 5`. ~1 token per call.
-   - For retail, show only items with compliance-impact keywords in the title/summary:
-     - **Debt-related**: "bond", "notes", "credit facility", "term loan", "debt raise", "refinanc".
-     - **Business-line**: "acquisition", "divestiture", "spin-off", "new business", "pivot".
-     - **Dividend**: "dividend increase", "dividend cut", "special dividend".
-     - **Material**: 8-K (form-type in filings).
-3. Rank items: compliance-impact > size of deal > recency.
+   - Call `get_news` with `symbol: <SYM>`, `limit: 20`, **`compliance_relevance: "high"`** — this returns *only* articles tagged debt_issuance / m_and_a / dividend_change / equity_action / distress. The tagger is server-side; you do not need to keyword-match yourself.
+   - If `compliance_relevance: "high"` returns 0 hits, retry with `compliance_relevance: "medium"` to surface softer signals (refinancings, share splits, governance changes).
+   - Call `/api/insights/{SYM}/staleness` — this returns `is_stale: true` whenever a material 8-K (item codes 1.01, 2.01, 2.03, 5.02, 8.01) was filed *after* the symbol's last screening, with the filing URL inline. ~1 token.
+   - Optionally call `get_sec_filings` for the raw 10-K/10-Q calendar if the user wants context.
+3. Rank items by `compliance_categories` (debt_issuance + m_and_a outrank dividend_change + equity_action) then by recency.
 4. Do NOT issue a new verdict — just flag *"this is worth a re-screen; run halal-verdict on <SYM> to see current status"*.
 
 ## ~N tokens per run
@@ -31,8 +28,9 @@ description: Surface news and SEC filings that could change a holding's Shariah-
 
 ## Output structure
 
-- Per symbol (if material news found): `<SYM> — <headline> (<date>, <source>). Why it matters: <one-line compliance-impact explanation>.`
-- Summary: total items flagged, recommended follow-ups.
+- Per symbol (if material news found): `<SYM> — <headline> (<date>, <source>). Tagged: <compliance_categories>. Why it matters: <one-line compliance-impact explanation>.`
+- If `staleness.is_stale: true`, prepend a "🚨 Re-screen recommended" line with the filing URL.
+- Summary: total items flagged grouped by category, plus how many holdings have stale screenings.
 - No verdict header, no methodology matrix (this isn't a verdict).
 - Non-fatwa disclaimer not required (no verdict emitted), but branding footer is.
 

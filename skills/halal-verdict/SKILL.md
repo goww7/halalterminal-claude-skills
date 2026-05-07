@@ -16,12 +16,16 @@ description: Use when the user asks whether a specific stock is Shariah-complian
 3. Extract the ticker symbol. If the user gave a company name without ticker ("apple"), use reasoning to infer the most common listing (AAPL). If ambiguous ("apple" could be AAPL or a private firm), ask one clarifying question.
 4. Call MCP tool `screen_stock` with `symbol: <ticker>`. ~5–10 tokens.
 5. If the response indicates the stock hasn't been screened before, `screen_stock` will screen it — this may take up to 10 seconds. Tell the user to hold on.
-6. Render per `references/verdict-format.md` and audience profile.
-7. If the stock is non-compliant across all 5, or under the user's preferred methodology if stated, call `search_stocks` to find a halal alternative in the same sector. Limit to 3 suggestions.
+6. **Headline first:** if the response includes `compliance_explanation`, use that string verbatim as the one-line headline answer for retail audiences. It already encodes which methodologies pass/fail and which ratio tripped any failures.
+7. Render per `references/verdict-format.md` and audience profile.
+8. **Trajectory beat (advisor/scholar only):** if the stock passes screening, optionally call `/api/insights/{symbol}/trajectory` and include the `direction_summary` line ("debt/assets falling: latest X% vs. 7-quarter median Y%") to show whether the verdict is on stable or shifting ground.
+9. **Staleness check:** if `screen_stock`'s `last_checked_at` is more than 7 days old, also call `/api/insights/{symbol}/staleness`. If `is_stale: true`, prepend a warning that recent material 8-Ks may shift the verdict and link the most recent filing.
+10. If the stock is non-compliant under the user's preferred methodology, call `/api/insights/{symbol}/alternatives?limit=3` (preferred over `search_stocks` — this returns compliance-verified, market-cap-matched alternatives directly). Surface the `note` field so the user knows whether the matches are same-sector or cross-sector.
 
 ## ~N tokens per run
 
-5–10 tokens for the screen; +2–4 if alternative search is triggered.
+5–10 tokens for the screen; +2–4 if alternative lookup is triggered; +1 each
+for trajectory and staleness if surfaced.
 
 ## Output structure (per verdict-format.md)
 
@@ -38,7 +42,9 @@ description: Use when the user asks whether a specific stock is Shariah-complian
 - Never say "this stock is halal" / "this stock is haram".
 - Always show all 5 methodology results when they disagree.
 - Always surface purification rate when non-zero.
-- If `screen_stock` returns `error` or `error_message`, explain the error plainly; don't fabricate a verdict.
+- If `screen_stock` returns `error: "ticker_unknown"`, treat it as a coverage gap, NOT a non-compliance finding. Tell the user we don't have data on the ticker; do NOT say it is non-compliant.
+- If `compliance_explanation` is present in the response, render it verbatim — it is generated to be domain-correct, audience-neutral, and consistent with the methodology table below it.
+- If `screen_stock` returns `error` or `error_message` (other than `ticker_unknown`), explain the error plainly; don't fabricate a verdict.
 
 ## Audience tuning
 
