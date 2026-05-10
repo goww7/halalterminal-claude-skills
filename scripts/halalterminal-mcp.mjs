@@ -45,7 +45,10 @@ if (!API_KEY) {
   process.exit(1);
 }
 
-const SSE_URL = `https://mcp.halalterminal.com/sse?api_key=${encodeURIComponent(API_KEY)}`;
+// Header-only auth — never put the key in the URL. The backend logs (Caddy
+// access log + any future intermediary) capture full URLs, and `ht_…` keys
+// leaking into logs is a chargeback risk.
+const SSE_URL = "https://mcp.halalterminal.com/sse";
 
 const sseTransport = new SSEClientTransport(new URL(SSE_URL), {
   requestInit: {

@@ -42,6 +42,11 @@ All notable changes to this project will be documented in this file.
 - **Umbrella skill `using-halal-investing` now runs a pre-flight API key check before routing.** If no key is configured, it walks the user through the 30-second signup flow inline instead of letting downstream skills fail with "no key" errors. This is the behavior fix for "first help the user create the API instead of blathering."
 - Umbrella also intercepts 401/403 mid-session and re-runs the setup flow when a stored key is rotated/revoked.
 
+## [1.0.2] — 2026-05-10
+
+### Security
+- **MCP bridge no longer sends the API key in the URL query string.** Previously the bridge sent the key in BOTH the SSE URL (`?api_key=…`) and the `X-API-Key` header. The URL copy was redundant — the backend has always accepted header-only auth — and would leak into Caddy access logs and any future proxy hop. The bridge is now header-only. No user action required beyond updating the plugin; existing keys keep working.
+
 ## [Unreleased]
 
 Nothing yet.
