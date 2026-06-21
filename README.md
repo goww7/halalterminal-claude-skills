@@ -115,7 +115,7 @@ Apache-2.0 — see [LICENSE](LICENSE).
 ## Support
 
 - Contact: yassir@halalterminal.com
-- Dashboard: https://halalterminal.com/dashboard
+- Dashboard: https://api.halalterminal.com/dashboard
 - API docs: https://api.halalterminal.com/docs (Swagger) · https://api.halalterminal.com/redoc (ReDoc)
 
 ---

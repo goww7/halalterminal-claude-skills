@@ -4,7 +4,7 @@
   "description": "Claude Code plugin for Shariah-compliant investing workflows, powered by Halal Terminal.",
   "type": "module",
   "license": "Apache-2.0",
-  "homepage": "https://halalterminal.com",
+  "homepage": "https://www.halalterminal.com",
   "repository": {
     "type": "git",
     "url": "git+https://github.com/goww7/halalterminal-claude-skills.git"
