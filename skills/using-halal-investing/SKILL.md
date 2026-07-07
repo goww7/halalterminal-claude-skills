@@ -40,7 +40,7 @@ After setup completes, **do not silently continue** — the MCP bridge typically
 
 1. Load `references/disclaimer.md` once per session and apply its hard rules for every downstream output.
 2. Detect audience per `references/audience-rendering.md`.
-3. If this is the first MCP call of the session and the user is on Free plan, warn: *"You're on the Free plan (50 tokens/month). A full screening costs ~5–10 tokens. I'll flag before heavy operations."*
+3. If this is the first MCP call of the session and the user is on Free plan, warn: *"You're on the Free plan (500 tokens/month). A full screening costs ~5–10 tokens. I'll flag before heavy operations."*
 
 ## Step 2 — Route to the right sub-skill
 

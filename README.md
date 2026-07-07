@@ -44,7 +44,7 @@ The Halal Terminal API is token-metered.
 
 | Plan | Monthly tokens | Price | Note |
 |---|---|---|---|
-| Free | 50 | $0 | ~5–10 full screenings |
+| Free | 500 | $0 | ~100 full screenings |
 | Starter | 2,500 | $19 | for individual investors |
 | Pro | 15,000 | $49 | webhooks, bulk priority |
 | Enterprise | Unlimited | $199+ | custom methodologies, SLA |

@@ -63,7 +63,7 @@ Try `curl https://api.halalterminal.com/api/keys/token-costs` with the key. If 2
 ~50 tokens    bulk-index screen
 ```
 
-Then remind: Free plan = 50 tokens/month. Upgrade at https://halalterminal.com.
+Then remind: Free plan = 500 tokens/month. Upgrade at https://halalterminal.com.
 
 ## 6. Skill inventory
 
