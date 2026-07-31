@@ -121,3 +121,9 @@ Apache-2.0 — see [LICENSE](LICENSE).
 ---
 
 Powered by Halal Terminal — https://halalterminal.com
+
+
+---
+
+Part of the [Halal Terminal open ecosystem](https://github.com/goww7/awesome-islamic-finance):
+[API](https://api.halalterminal.com) · [MCP server](https://github.com/goww7/halalterminal-mcp) · [Python SDK](https://github.com/goww7/halalterminal-sdk-python) · [JS SDK](https://github.com/goww7/halalterminal-sdk-js) · [Datasets](https://github.com/goww7/sp500-shariah-compliance) · [Awesome Islamic Finance](https://github.com/goww7/awesome-islamic-finance)
