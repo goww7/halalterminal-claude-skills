@@ -20,7 +20,7 @@ description: Use when the user asks whether a specific stock is Shariah-complian
 7. Render per `references/verdict-format.md` and audience profile.
 8. **Trajectory beat (advisor/scholar only):** if the stock passes screening, optionally call `/api/insights/{symbol}/trajectory` and include the `direction_summary` line ("debt/assets falling: latest X% vs. 7-quarter median Y%") to show whether the verdict is on stable or shifting ground.
 9. **Staleness check:** if `screen_stock`'s `last_checked_at` is more than 7 days old, also call `/api/insights/{symbol}/staleness`. If `is_stale: true`, prepend a warning that recent material 8-Ks may shift the verdict and link the most recent filing.
-10. If the stock is non-compliant under the user's preferred methodology, call `/api/insights/{symbol}/alternatives?limit=3` (preferred over `search_stocks` — this returns compliance-verified, market-cap-matched alternatives directly). Surface the `note` field so the user knows whether the matches are same-sector or cross-sector.
+10. If the stock fails under **all 5 methodologies**, or fails under the user's preferred methodology if they stated one, call `/api/insights/{symbol}/alternatives?limit=3` (preferred over `search_stocks` — this returns compliance-verified, market-cap-matched alternatives directly). Surface the `note` field so the user knows whether the matches are same-sector or cross-sector.
 
 ## ~N tokens per run
 
