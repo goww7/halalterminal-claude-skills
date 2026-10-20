@@ -58,7 +58,29 @@ const sseTransport = new SSEClientTransport(new URL(SSE_URL), {
 
 const stdioTransport = new StdioServerTransport();
 
-await sseTransport.start();
+// A rejection from start() happens before the handlers below are wired, so
+// it used to surface as a raw Node stack trace. A rejected key is the common
+// case and deserves to be named.
+try {
+  await sseTransport.start();
+} catch (error) {
+  const status = error?.code;
+  if (status === 401 || status === 403) {
+    console.error(
+      `halalterminal-mcp: the API key was rejected (HTTP ${status}).\n` +
+      "  Run /halal-setup to store a current key, or check it at\n" +
+      "  https://api.halalterminal.com."
+    );
+  } else {
+    console.error(
+      `halalterminal-mcp: could not reach ${SSE_URL}.\n` +
+      `  ${error?.message ?? error}\n` +
+      "  Run /halal-doctor for a full diagnostic."
+    );
+  }
+  process.exit(1);
+}
+
 await stdioTransport.start();
 
 stdioTransport.onmessage = (msg) => sseTransport.send(msg);
