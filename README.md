@@ -28,9 +28,13 @@ Plus `/halal-setup` (one-time API key capture) and `/halal-doctor` (diagnostics)
 ## Install
 
 ```
+/plugin marketplace add goww7/halalterminal-claude-skills
 /plugin install halalterminal-claude-skills
 /halal-setup
 ```
+
+The first line registers this repo as a marketplace. Without it, `/plugin install`
+answers `not found in any configured marketplace`.
 
 `/halal-setup` walks you through:
 
@@ -47,7 +51,7 @@ The Halal Terminal API is token-metered.
 | Free | 500 | $0 | ~100 full screenings |
 | Starter | 2,500 | $19 | for individual investors |
 | Pro | 15,000 | $49 | webhooks, bulk priority |
-| Enterprise | Unlimited | $199+ | custom methodologies, SLA |
+| Enterprise | 50,000 | $199 | custom methodologies, SLA, $0.005/token overage with no hard cap |
 
 Sign up: https://api.halalterminal.com
 

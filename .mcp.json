@@ -2,7 +2,7 @@
   "mcpServers": {
     "halalterminal": {
       "command": "node",
-      "args": ["scripts/halalterminal-mcp.mjs"],
+      "args": ["${CLAUDE_PLUGIN_ROOT}/scripts/halalterminal-mcp.mjs"],
       "env": {
         "HALALTERMINAL_API_KEY": "${HALALTERMINAL_API_KEY}"
       }

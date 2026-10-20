@@ -47,6 +47,16 @@ All notable changes to this project will be documented in this file.
 ### Security
 - **MCP bridge no longer sends the API key in the URL query string.** Previously the bridge sent the key in BOTH the SSE URL (`?api_key=…`) and the `X-API-Key` header. The URL copy was redundant — the backend has always accepted header-only auth — and would leak into Caddy access logs and any future proxy hop. The bridge is now header-only. No user action required beyond updating the plugin; existing keys keep working.
 
+## [1.0.3] — 2026-10-20
+
+### Fixed
+- **The bundled MCP server now starts from any working directory.** `.mcp.json` pointed at `scripts/halalterminal-mcp.mjs` by a relative path, which Claude Code resolves against the user's project directory. The bridge therefore connected only for a user whose session happened to sit in the plugin's own checkout, and failed everywhere else with `CONNECTION_CLOSED`, so every skill lost its tools. The path is now `${CLAUDE_PLUGIN_ROOT}/scripts/halalterminal-mcp.mjs`.
+- **A rejected API key now reports as one line.** The rejection raised by `sseTransport.start()` landed before `onerror` was wired, so a wrong or revoked key printed a raw Node stack trace. The bridge now names the HTTP status and points at `/halal-setup`.
+
+### Documentation
+- **Install instructions add the missing marketplace step.** `/plugin install halalterminal-claude-skills` on its own answers `not found in any configured marketplace`. `/plugin marketplace add goww7/halalterminal-claude-skills` comes first.
+- Enterprise row in the plans table read `Unlimited` tokens at `$199+`. The plan carries 50,000 tokens at $199, with $0.005/token overage and no hard cap.
+
 ## [Unreleased]
 
 Nothing yet.
